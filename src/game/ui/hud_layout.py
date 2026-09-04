@@ -1,0 +1,11 @@
+MARIO_POS = (16, 12)
+SCORE_POS = (16, 24)
+
+TIME_LABEL_POS = (260, 20)
+TIME_VALUE_POS = (188, 24)
+
+RESERVE_BOX_POS = (210, 10)
+
+COIN_POS = (120, 24)
+LIVES_POS = (240, 24)
+YOSHI_COIN_POS = (130, 20)  # Ajuste conforme seu layout
