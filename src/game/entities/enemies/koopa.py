@@ -170,14 +170,12 @@ class Koopa(Enemy):
     def _handle_player_collision(self, player, prev_player_rect):
         # ==========================================
         # 1. SEMPRE impede dano se o jogador está SUBINDO (direction.y < 0)
-        #    Isso é crucial: após o pisão, o jogador quica para cima e não pode
-        #    sofrer dano no MESMO frame em que a colisão é reavaliada.
         # ==========================================
         if player.direction.y < 0:
             return
 
         # ==========================================
-        # 2. Calcula is_stomp (com margem de +16 para o casco de 32px)
+        # 2. Calcula is_stomp (com margem de +16)
         # ==========================================
         is_stomp = (prev_player_rect is not None and
                     player.direction.y > 0 and
@@ -188,24 +186,44 @@ class Koopa(Enemy):
         # ==========================================
         if self.state == "walking":
             if is_stomp:
-                # Pisão -> vira casco parado
                 self.state = "shell_idle"
                 self.shell_idle_timer = self.shell_idle_duration
                 self.direction.x = 0
                 player.direction.y = -8
                 self.game.audio.play_sound("stomp")
+                # EFEITO DE STOMP
+                from src.game.world.effects.stomp_effect import StompEffect
+                from src.game.resources.effects.effect_assets import effects_assets
+                if hasattr(player, 'level') and player.level:
+                    player.level.effects.add(StompEffect(
+                        (self.rect.centerx, self.rect.centery),
+                        effects_assets.get_stomp()
+                    ))
             else:
                 self._hurt_player(player)
 
         elif self.state == "shell_idle":
-            if is_stomp:
-                # Pisão no casco parado -> chuta (shell_sliding)
+            # ==========================================
+            # VERIFICAÇÃO DE STOMP ROBUSTA PARA O CASCO
+            # ==========================================
+            stomp_on_shell = (prev_player_rect is not None and
+                              player.direction.y > 0 and
+                              prev_player_rect.bottom <= self.rect.top + 20)
+            if stomp_on_shell:
+                # PISÃO NO CASCO PARADO -> chuta (shell_sliding)
                 self.direction.x = 1 if player.rect.centerx < self.rect.centerx else -1
                 self.state = "shell_sliding"
                 self.game.audio.play_sound("bump")
                 player.direction.y = -8
+                # EFEITO DE STOMP
+                from src.game.world.effects.stomp_effect import StompEffect
+                from src.game.resources.effects.effect_assets import effects_assets
+                if hasattr(player, 'level') and player.level:
+                    player.level.effects.add(StompEffect(
+                        (self.rect.centerx, self.rect.top),
+                        effects_assets.get_stomp()
+                    ))
             else:
-                # Não faz nada (casco parado)
                 pass
 
         elif self.state == "shell_sliding":
@@ -214,42 +232,41 @@ class Koopa(Enemy):
                 self.dead_timer = 60
                 self.game.audio.play_sound("stomp_no_damage")
             elif is_stomp:
-                # Pisa no casco girando -> para
                 self.state = "shell_idle"
                 self.shell_idle_timer = self.shell_idle_duration
                 self.direction.x = 0
                 player.direction.y = -8
                 self.game.audio.play_sound("stomp_no_damage")
+                # EFEITO DE STOMP
+                from src.game.world.effects.stomp_effect import StompEffect
+                from src.game.resources.effects.effect_assets import effects_assets
+                if hasattr(player, 'level') and player.level:
+                    player.level.effects.add(StompEffect(
+                        (self.rect.centerx, self.rect.top),
+                        effects_assets.get_stomp()
+                    ))
             else:
                 self._hurt_player(player)
 
-
         elif self.state == "empty":
             if is_stomp:
-                # Pisa no casco vazio -> chuta (direção oposta à posição do player)
                 self.direction.x = 1 if player.rect.centerx < self.rect.centerx else -1
                 self.state = "shell_sliding"
                 self.game.audio.play_sound("bump")
                 player.direction.y = -8
             else:
-                # ==========================================
-                # CHUTE LATERAL: se o jogador está se movendo,
-                # o casco é chutado na direção do movimento.
-                # ==========================================
+                # CHUTE LATERAL
                 if player.direction.x != 0:
                     self.direction.x = 1 if player.direction.x > 0 else -1
                     self.state = "shell_sliding"
                     self.game.audio.play_sound("bump")
-                    # Não quica o jogador, ele simplesmente chuta o casco
                 else:
-                    # Jogador parado: nada acontece
                     pass
 
         elif self.state == "unshelled":
             if self.hurts_on_unshelled_touch:
                 self._hurt_player(player)
             else:
-                # Se for pisado, morre
                 self.state = "dead"
                 self.dead_timer = 60
                 self.game.audio.play_sound("stomp")

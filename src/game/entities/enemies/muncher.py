@@ -40,6 +40,13 @@ class Muncher(Enemy):
                     # Pulo girando: quica e não sofre dano
                     player.direction.y = -10
                     self.game.audio.play_sound('stomp_no_damage')
+                    from src.game.world.effects.stomp_effect import StompEffect
+                    from src.game.resources.effects.effect_assets import effects_assets
+                    if hasattr(player, 'level') and player.level:
+                        player.level.effects.add(StompEffect(
+                            (self.rect.centerx, self.rect.top),
+                            effects_assets.get_stomp()
+                        ))
                 else:
                     # Pisão sem giro: sofre dano
                     if player.big:
