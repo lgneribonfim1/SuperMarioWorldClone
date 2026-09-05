@@ -14,6 +14,7 @@ from src.game.world.moving_platform import HorizontalPlatform, VerticalPlatform
 from src.game.world.rotating_block import RotatingBlock
 from src.game.entities.enemies.rex import Rex
 from src.game.entities.enemies.koopa import Koopa
+from src.game.entities.enemies.paratroopa import Paratroopa
 
 
 class LevelBuilder:
@@ -212,19 +213,20 @@ class LevelBuilder:
                         enemies.add(rex)
 
                     elif spawn_type == "KoopaRed":
-                        # Vermelho: vira nas bordas (patrulha), velocidade normal.
-                        # Outras cores no futuro: mesma classe Koopa, só
-                        # trocando os frames e esses parâmetros — ver
-                        # koopa.py e a conversa sobre o comportamento das
-                        # cores (verde/amarelo turns_at_edges=False,
-                        # azul+amarelo speed maior, azul kicks_shells=True
-                        # e hurts_on_unshelled_touch=True).
                         koopa = Koopa((x, y),
                                       self.assets.get_koopa_red_frames(),
                                       self.game,
                                       turns_at_edges=True,
                                       speed=1.0)
                         enemies.add(koopa)
+
+                    elif spawn_type == "ParatroopaRed":
+                        para = Paratroopa((x, y),
+                                          self.assets.get_paratroopa_red_frames(),
+                                          self.game,
+                                          turns_at_edges=True,
+                                          speed=1.0)
+                        enemies.add(para)
 
         return {
             "tiles": tiles,

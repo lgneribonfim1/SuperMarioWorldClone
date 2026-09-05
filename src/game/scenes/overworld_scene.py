@@ -376,18 +376,3 @@ class OverworldScene(Scene):
             self.message_timer -= 1
             if self.message_timer <= 0:
                 self.message = ""
-
-"""
-mapping = {
-            "Level": [(0, 0, "node_2_3")],
-            "Cave": [(0, 0, "node_3_1")],
-            "GhostHouse": [(0, 0, "node_2_4")],
-            "CastleSmall": [(0, 0, "node_2_9")],
-            "CastleMedium": [(0, 0, "node_1_9"), (0, -1, "node_0_9")],
-            "CastleLarge": [
-                (-1, 0, "node_4_2"), (0, 0, "node_4_3"), (1, 0, "node_4_4"),
-                (-1, -1, "node_3_2"), (0, -1, "node_3_3"), (1, -1, "node_3_4")
-            ],
-            "CastleBoss": [(0, 0, "node_1_8"), (0, -1, "node_0_8")],
-        }
-"""

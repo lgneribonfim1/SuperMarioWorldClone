@@ -2,7 +2,7 @@ import os
 import pygame
 from src.game.graphics.spritesheet import SpriteSheet
 from src.game.settings import TILES_EXPORT_DIR
-from src.game.settings import ASSETS_DIR
+
 
 class AssetManager:
     def __init__(self):
@@ -10,37 +10,26 @@ class AssetManager:
         # SPRITESHEETS DO JOGO
         # -----------------------------
         self.animated_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR, "graphics", "animations", "animated_objects_tileset.png"),
-            16, 16)
+            "assets/graphics/animations/animated_objects_tileset.png", 16, 16)
         self.animated_sheet_01 = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "animations", "animated_objects_tileset_01.png"),
-            16, 16)
+            "assets/graphics/animations/animated_objects_tileset_01.png", 16, 16)
         self.static_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "tilesets", "static_objects_tileset.png"),
-            16, 16)
+            "assets/graphics/tilesets/static_objects_tileset.png", 16, 16)
         self.piranha_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "enemies", "jumping_piranha.png"),
-            16, 24)
+            "assets/graphics/enemies/jumping_piranha.png", 16, 24)
         self.volcano_lotus_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "enemies", "volcano_lotus.png"),
-            16, 16)
+            "assets/graphics/enemies/volcano_lotus.png", 16, 16)
         self.muncher_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "enemies", "muncher.png"),
-            16, 16)
+            "assets/graphics/enemies/muncher.png", 16, 16)
         # Plataforma Flutuante Horizontal (tiles da linha 3, colunas 0-4)
         self.platform_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "animations", "platforms_floating.png"),
-            16, 16)
+            "assets/graphics/animations/platforms_floating.png", 16, 16)
         self.rotating_block_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "animations", "rotating_blocks.png"),
-            16, 16)
+            "assets/graphics/animations/rotating_blocks.png", 16, 16)
         self.rotating_debris_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "animations", "rotating_block_debris.png"),
-            8, 8)
-        self.rex_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "enemies", "rex.png"), 16, 16)
-        self.koopa_red_sheet = SpriteSheet(
-            os.path.join(ASSETS_DIR,"graphics", "enemies", "koopa_red.png"), 16, 16)
+            "assets/graphics/animations/rotating_block_debris.png", 8, 8)
+        self.rex_sheet = SpriteSheet("assets/graphics/enemies/rex.png", 16, 16)
+        self.koopa_red_sheet = SpriteSheet("assets/graphics/enemies/koopa_red.png", 16, 16)
 
         self.horizontal_platform_surface = self._build_horizontal_platform()
         self.vertical_platform_surface = self.horizontal_platform_surface
@@ -220,9 +209,8 @@ class AssetManager:
         self.koopa_red_squashed_frame = self.koopa_red_sheet.extract_tile(row=5, col=5, scale=2)
 
         # Koopa alado (Paratroopa): cada pose ocupa um bloco 2x2 de tiles
-        # (2 colunas de largura x 2 linhas de altura — linha 8 = cabeça,
-        # linha 9 = corpo, igual ao walk_frames, só que também precisa de
-        # 2 colunas porque a asa estende a silhueta pros lados).
+        # (2 colunas de largura x 2 linhas de altura — linha 8 = cabeça/asas,
+        # linha 9 = corpo/pés).
         def build_wing_pose(col_left, col_right):
             top_left = self.koopa_red_sheet.extract_tile(row=8, col=col_left, scale=2)
             top_right = self.koopa_red_sheet.extract_tile(row=8, col=col_right, scale=2)
@@ -236,6 +224,9 @@ class AssetManager:
             pose.blit(bottom_right, (32, 32))
             return pose
 
+        # Frame 1 do vôo: colunas 2 e 3
+        # Frame 2 do vôo: colunas 4 e 5
+        # Frame de virada:  colunas 6 e 7
         self.koopa_red_fly_frames = [
             build_wing_pose(2, 3),
             build_wing_pose(4, 5),
@@ -343,6 +334,18 @@ class AssetManager:
     def get_rex_dead_frame(self):
         return self.rex_dead_frame
 
+    def get_paratroopa_red_frames(self):
+        return {
+            "walk": self.koopa_red_walk_frames,
+            "shell_idle": self.koopa_red_shell_idle_frame,
+            "shell_slide": self.koopa_red_shell_slide_frames,
+            "unshelled": self.koopa_red_unshelled_frames,
+            "pop_out": self.koopa_red_pop_out_frames,
+            "squashed": self.koopa_red_squashed_frame,
+            "fly": self.koopa_red_fly_frames,
+            "fly_turn": self.koopa_red_fly_turn_frame,
+        }
+
     def get_koopa_red_frames(self):
         return {
             "walk": self.koopa_red_walk_frames,
@@ -351,4 +354,14 @@ class AssetManager:
             "unshelled": self.koopa_red_unshelled_frames,
             "pop_out": self.koopa_red_pop_out_frames,
             "squashed": self.koopa_red_squashed_frame,
+        }
+        return {
+            "walk": self.koopa_red_walk_frames,
+            "shell_idle": self.koopa_red_shell_idle_frame,
+            "shell_slide": self.koopa_red_shell_slide_frames,
+            "unshelled": self.koopa_red_unshelled_frames,
+            "pop_out": self.koopa_red_pop_out_frames,
+            "squashed": self.koopa_red_squashed_frame,
+            "fly": self.koopa_red_fly_frames,
+            "fly_turn": self.koopa_red_fly_turn_frame,
         }

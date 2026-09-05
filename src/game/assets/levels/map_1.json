@@ -809,6 +809,9 @@
                 "121,24": true,
                 "126,24": true,
                 "131,24": true
+            },
+            "ParatroopaRed": {
+                "15,20": true
             }
         }
     }
