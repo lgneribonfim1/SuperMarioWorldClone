@@ -22,7 +22,6 @@ class HudFont:
         self.load_elements()
         self.load_white_digits()
         self.load_gold_digits()
-        self.load_gold_digits()
 
     def load_white_digits(self):
         for i in range(10):

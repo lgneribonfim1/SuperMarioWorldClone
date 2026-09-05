@@ -2,7 +2,7 @@ import os
 import pygame
 from src.game.graphics.spritesheet import SpriteSheet
 from src.game.settings import TILES_EXPORT_DIR
-
+from src.game.settings import ASSETS_DIR
 
 class AssetManager:
     def __init__(self):
@@ -10,26 +10,37 @@ class AssetManager:
         # SPRITESHEETS DO JOGO
         # -----------------------------
         self.animated_sheet = SpriteSheet(
-            "assets/graphics/animations/animated_objects_tileset.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "animations", "animated_objects_tileset.png"),
+            16, 16)
         self.animated_sheet_01 = SpriteSheet(
-            "assets/graphics/animations/animated_objects_tileset_01.png", 16, 16)
+            os.path.join(ASSETS_DIR,"graphics", "animations", "animated_objects_tileset_01.png"),
+            16, 16)
         self.static_sheet = SpriteSheet(
-            "assets/graphics/tilesets/static_objects_tileset.png", 16, 16)
+            os.path.join(ASSETS_DIR,"graphics", "tilesets", "static_objects_tileset.png"),
+            16, 16)
         self.piranha_sheet = SpriteSheet(
-            "assets/graphics/enemies/jumping_piranha.png", 16, 24)
+            os.path.join(ASSETS_DIR,"graphics", "enemies", "jumping_piranha.png"),
+            16, 24)
         self.volcano_lotus_sheet = SpriteSheet(
-            "assets/graphics/enemies/volcano_lotus.png", 16, 16)
+            os.path.join(ASSETS_DIR,"graphics", "enemies", "volcano_lotus.png"),
+            16, 16)
         self.muncher_sheet = SpriteSheet(
-            "assets/graphics/enemies/muncher.png", 16, 16)
+            os.path.join(ASSETS_DIR,"graphics", "enemies", "muncher.png"),
+            16, 16)
         # Plataforma Flutuante Horizontal (tiles da linha 3, colunas 0-4)
         self.platform_sheet = SpriteSheet(
-            "assets/graphics/animations/platforms_floating.png", 16, 16)
+            os.path.join(ASSETS_DIR,"graphics", "animations", "platforms_floating.png"),
+            16, 16)
         self.rotating_block_sheet = SpriteSheet(
-            "assets/graphics/animations/rotating_blocks.png", 16, 16)
+            os.path.join(ASSETS_DIR,"graphics", "animations", "rotating_blocks.png"),
+            16, 16)
         self.rotating_debris_sheet = SpriteSheet(
-            "assets/graphics/animations/rotating_block_debris.png", 8, 8)
-        self.rex_sheet = SpriteSheet("assets/graphics/enemies/rex.png", 16, 16)
-        self.koopa_red_sheet = SpriteSheet("assets/graphics/enemies/koopa_red.png", 16, 16)
+            os.path.join(ASSETS_DIR,"graphics", "animations", "rotating_block_debris.png"),
+            8, 8)
+        self.rex_sheet = SpriteSheet(
+            os.path.join(ASSETS_DIR,"graphics", "enemies", "rex.png"), 16, 16)
+        self.koopa_red_sheet = SpriteSheet(
+            os.path.join(ASSETS_DIR,"graphics", "enemies", "koopa_red.png"), 16, 16)
 
         self.horizontal_platform_surface = self._build_horizontal_platform()
         self.vertical_platform_surface = self.horizontal_platform_surface
