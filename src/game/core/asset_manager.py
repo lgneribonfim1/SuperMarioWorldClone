@@ -1,7 +1,7 @@
 import os
 import pygame
 from src.game.graphics.spritesheet import SpriteSheet
-from src.game.settings import TILES_EXPORT_DIR
+from src.game.settings import TILES_EXPORT_DIR, ASSETS_DIR
 
 
 class AssetManager:
@@ -10,26 +10,39 @@ class AssetManager:
         # SPRITESHEETS DO JOGO
         # -----------------------------
         self.animated_sheet = SpriteSheet(
-            "assets/graphics/animations/animated_objects_tileset.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "animations", "animated_objects_tileset.png"),
+            16, 16)
         self.animated_sheet_01 = SpriteSheet(
-            "assets/graphics/animations/animated_objects_tileset_01.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "animations", "animated_objects_tileset_01.png"),
+            16, 16)
         self.static_sheet = SpriteSheet(
-            "assets/graphics/tilesets/static_objects_tileset.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "tilesets", "static_objects_tileset.png"),
+            16, 16)
         self.piranha_sheet = SpriteSheet(
-            "assets/graphics/enemies/jumping_piranha.png", 16, 24)
+            os.path.join(ASSETS_DIR, "graphics", "enemies", "jumping_piranha.png"),
+            16, 24)
         self.volcano_lotus_sheet = SpriteSheet(
-            "assets/graphics/enemies/volcano_lotus.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "enemies", "volcano_lotus.png"),
+            16, 16)
         self.muncher_sheet = SpriteSheet(
-            "assets/graphics/enemies/muncher.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "enemies", "muncher.png"),
+            16, 16)
         # Plataforma Flutuante Horizontal (tiles da linha 3, colunas 0-4)
         self.platform_sheet = SpriteSheet(
-            "assets/graphics/animations/platforms_floating.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "animations", "platforms_floating.png"),
+            16, 16)
         self.rotating_block_sheet = SpriteSheet(
-            "assets/graphics/animations/rotating_blocks.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "animations", "rotating_blocks.png"),
+            16, 16)
         self.rotating_debris_sheet = SpriteSheet(
-            "assets/graphics/animations/rotating_block_debris.png", 8, 8)
-        self.rex_sheet = SpriteSheet("assets/graphics/enemies/rex.png", 16, 16)
-        self.koopa_red_sheet = SpriteSheet("assets/graphics/enemies/koopa_red.png", 16, 16)
+            os.path.join(ASSETS_DIR, "graphics", "animations", "rotating_block_debris.png"),
+            8, 8)
+        self.rex_sheet = SpriteSheet(
+            os.path.join(ASSETS_DIR, "graphics", "enemies", "rex.png"),
+            16, 16)
+        self.koopa_red_sheet = SpriteSheet(
+            os.path.join(ASSETS_DIR, "graphics", "enemies", "koopa_red.png"),
+            16, 16)
 
         self.horizontal_platform_surface = self._build_horizontal_platform()
         self.vertical_platform_surface = self.horizontal_platform_surface
@@ -37,7 +50,9 @@ class AssetManager:
         # -----------------------------
         # BACKGROUND
         # -----------------------------
-        self.background_sheet = SpriteSheet("assets/graphics/backgrounds/backgrounds_1.png")
+        self.background_sheet = SpriteSheet(
+            os.path.join(ASSETS_DIR, "graphics", "backgrounds", "backgrounds_1.png")
+        )
         self.background_image = self.background_sheet.extract_sprite(
             row=0,
             col=2,
@@ -125,14 +140,12 @@ class AssetManager:
             head_x = 0
             head_y = 0
             body_x = 8
-            body_y = 32
+            body_y = 32  # Fixo para alinhar o fundo do corpo ao fundo da superfície (y=63)
 
-            # Ajustes para o frame 2
+            # Ajustes para o frame 2 (cabeça desce 1px, corpo permanece alinhado ao fundo)
             if frame_idx == 1:
-                # Cabeça desce 1px (na imagem final)
                 head_y = 1
-                # Corpo sobe 1px (mantendo a proporção visual)
-                body_y = 31
+                # (Removido o "body_y = 31", agora ele usa o valor padrão 32)
 
             # Coloca o corpo (sempre 8px para a direita)
             rex_full.blit(body_tile, (body_x, body_y))
@@ -153,16 +166,10 @@ class AssetManager:
 
             # Frame 1 (tamanho normal)
             self.rex_small_frames.append(tile_small_1)
-
-            # Frame 2 (conteúdo tem 1px a menos de altura)
-            # Criamos uma superfície nova de 32x32 e copiamos o conteúdo
-            # deslocado 1 pixel para cima, deixando o fundo vazio embaixo.
             corrected_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
-            # Obtém a área visível real
             bounding = tile_small_2.get_bounding_rect()
-            # Copia apenas o conteúdo visível para a superfície 32x32,
-            # deslocando para cima (y = -1) para preencher o topo.
-            corrected_surface.blit(tile_small_2, (0, -1), bounding)
+            y_offset = 32 - bounding.height
+            corrected_surface.blit(tile_small_2, (bounding.x, y_offset), bounding)
 
             self.rex_small_frames.append(corrected_surface)
 

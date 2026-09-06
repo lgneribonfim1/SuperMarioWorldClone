@@ -26,13 +26,14 @@ class Rex(Enemy):
 
     def apply_gravity(self, level):
         self.velocity_y += self.gravity
-        self.rect.y += self.velocity_y
-
+        # Usa round() para suavizar a queda
+        self.rect.y += round(self.velocity_y)
         self.on_ground = False
         if level:
             for tile in level.collision_tiles:
                 if tile.rect.colliderect(self.rect):
-                    if self.velocity_y > 0:
+                    # >= 0 garante que ele pouse mesmo com velocidade 0
+                    if self.velocity_y >= 0:
                         self.rect.bottom = tile.rect.top
                         self.velocity_y = 0
                         self.on_ground = True
@@ -56,8 +57,19 @@ class Rex(Enemy):
             self.animate(self.small_frames)
             self.speed = 1.5
 
+            # >>> CORREÇÃO DA COLISÃO INVISÍVEL <<<
+            # Garante que o rect seja exatamente do tamanho da imagem pequena (32x32)
+            old_bottom = self.rect.bottom
+            self.rect.width = 32
+            self.rect.height = 32
+            self.rect.bottom = old_bottom
+            self.hitbox = self.rect.inflate(-6, -4)
+            # ======================================
+
         # Movimento horizontal
-        self.rect.x += self.direction.x * self.speed
+        # >>> CORREÇÃO DA VELOCIDADE ASSIMÉTRICA <<<
+        # Usa round() para que -1.5 vire -2 e +1.5 vire +2 (velocidade igual)
+        self.rect.x += round(self.direction.x * self.speed)
 
         if player.level:
             for tile in player.level.collision_tiles:
@@ -134,14 +146,5 @@ class Rex(Enemy):
 
     def draw(self, surface, camera):
         if self.alive:
-            # Ancora pelo CENTRO-INFERIOR (midbottom) de self.rect, em vez de
-            # desenhar direto em cima de self.rect. Frames de tamanhos
-            # ligeiramente diferentes (ex: o segundo frame do Rex pequeno,
-            # 1px mais baixo que o primeiro) têm alturas de Surface
-            # diferentes — desenhar sempre a partir do mesmo rect.y fixo faz
-            # o frame mais baixo "flutuar" acima do chão pela diferença de
-            # altura. Ancorando pelo pé (midbottom), cada frame é desenhado
-            # exatamente onde o pé deveria tocar o chão, não importa sua
-            # altura própria — mesmo princípio já usado em Player.draw().
             image_rect = self.image.get_rect(midbottom=self.rect.midbottom)
             surface.blit(self.image, camera.apply(image_rect))

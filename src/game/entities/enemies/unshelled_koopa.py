@@ -52,12 +52,12 @@ class UnshelledKoopa(Enemy):
 
     def apply_gravity(self, level):
         self.velocity_y += self.gravity
-        self.rect.y += self.velocity_y
+        self.rect.y += round(self.velocity_y)  # Corrige a queda "tremida"
         self.on_ground = False
         if level:
             for tile in level.collision_tiles:
                 if tile.rect.colliderect(self.rect):
-                    if self.velocity_y > 0:
+                    if self.velocity_y >= 0:  # Corrige o "pulo fantasma" quando em 0
                         self.rect.bottom = tile.rect.top
                         self.velocity_y = 0
                         self.on_ground = True

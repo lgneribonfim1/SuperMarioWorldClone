@@ -43,6 +43,9 @@ class Koopa(Enemy):
         self.gravity = 0.8
         self.on_ground = False
 
+        self.animation_timer = 0
+        self.animation_frame_duration = 6  # A cada 6 pixels andados, troca o frame
+
         self.slide_speed = 6.0
         self.shell_idle_timer = 0
         self.shell_idle_duration = 5
@@ -83,6 +86,11 @@ class Koopa(Enemy):
             self.direction.x = -1
             self.facing_right = False
             self.shell_idle_timer = 0
+            # CORREÇÃO EXTRA: Voltar o tamanho do corpo
+            old_bottom = self.rect.bottom
+            self.rect.height = 64  # (ou o tamanho original do Koopa andando)
+            self.rect.bottom = old_bottom
+            self.hitbox = self.rect.inflate(-6, -4)
 
     def _resize_to_shell(self):
         if self.state in ("shell_idle", "empty"):
@@ -96,7 +104,7 @@ class Koopa(Enemy):
     # ------------------------------------------------------------
     def apply_gravity(self, level):
         self.velocity_y += self.gravity
-        self.rect.y += self.velocity_y
+        self.rect.y += round(self.velocity_y)
         self.on_ground = False
         if level:
             for tile in level.collision_tiles:
@@ -156,10 +164,11 @@ class Koopa(Enemy):
         if not frames:
             return
 
-        self.frame_index += self.animation_speed
-        if self.frame_index >= len(frames):
-            self.frame_index = 0
-        self.image = frames[int(self.frame_index)]
+        if self.state == "walking":
+            self.image = self.walk_frames[int(self.frame_index)]
+            if self.facing_right:
+                self.image = pygame.transform.flip(self.image, True, False)
+            return
 
         if self.facing_right:
             self.image = pygame.transform.flip(self.image, True, False)
@@ -168,12 +177,6 @@ class Koopa(Enemy):
     # COLISÃO COM O PLAYER (Método único e centralizado)
     # ------------------------------------------------------------
     def _handle_player_collision(self, player, prev_player_rect):
-        # ==========================================
-        # 1. SEMPRE impede dano se o jogador está SUBINDO (direction.y < 0)
-        # ==========================================
-        if player.direction.y < 0:
-            return
-
         # ==========================================
         # 2. Calcula is_stomp (com margem de +16)
         # ==========================================
@@ -306,6 +309,11 @@ class Koopa(Enemy):
         if self.state == "walking":
             self._check_wall_and_turn(level, self.base_speed)
             self._check_edge_and_turn(level)
+            # Sincroniza a animação com a distância percorrida
+            self.animation_timer += abs(self.base_speed)
+            if self.animation_timer >= self.animation_frame_duration:
+                self.animation_timer -= self.animation_frame_duration
+                self.frame_index = (self.frame_index + 1) % len(self.walk_frames)
 
         elif self.state == "shell_idle":
             self._resize_to_shell()
