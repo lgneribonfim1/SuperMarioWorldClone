@@ -43,6 +43,10 @@ class AssetManager:
         self.koopa_red_sheet = SpriteSheet(
             os.path.join(ASSETS_DIR, "graphics", "enemies", "koopa_red.png"),
             16, 16)
+        self.amazing_hammer_sheet = SpriteSheet(
+            os.path.join(ASSETS_DIR, "graphics", "enemies", "amazing_flying_hammer_bro.png"),
+            16, 16
+        )
 
         self.horizontal_platform_surface = self._build_horizontal_platform()
         self.vertical_platform_surface = self.horizontal_platform_surface
@@ -245,6 +249,53 @@ class AssetManager:
         # -----------------------------
         self.tile_image_cache = {}
 
+        # -----------------------------
+        # AMAZING FLYING HAMMER BROTHER
+        # -----------------------------
+        # Poses de arremesso: cada uma ocupa um bloco 2x2 de tiles (linhas
+        # 0-1). Esquerda usa colunas 0-1; direita usa colunas 2-3 — a
+        # spritesheet já traz a arte pronta pros dois lados, então
+        # extraímos direto em vez de espelhar (evita qualquer assimetria
+        # de flip).
+        def build_hammer_bro_pose(col_left, col_right):
+            top_left = self.amazing_hammer_sheet.extract_tile(row=0, col=col_left, scale=2)
+            top_right = self.amazing_hammer_sheet.extract_tile(row=0, col=col_right, scale=2)
+            bottom_left = self.amazing_hammer_sheet.extract_tile(row=1, col=col_left, scale=2)
+            bottom_right = self.amazing_hammer_sheet.extract_tile(row=1, col=col_right, scale=2)
+
+            pose = pygame.Surface((64, 64), pygame.SRCALPHA)
+            pose.blit(top_left, (0, 0))
+            pose.blit(top_right, (32, 0))
+            pose.blit(bottom_left, (0, 32))
+            pose.blit(bottom_right, (32, 32))
+            return pose
+
+        self.afhb_left_frames = [build_hammer_bro_pose(0, 1)]  # Pose de arremesso para a esquerda (64x64)
+        self.afhb_right_frames = [build_hammer_bro_pose(2, 3)]  # Pose de arremesso para a direita
+
+        # ==========================================================
+        # CORREÇÃO DOS ÍNDICES DA LINHA 2:
+        # (2,0) = Bloco | (2,1) = Asa Esquerda | (2,2) = Asa Direita
+        # ==========================================================
+
+        # Bloco (usamos o MESMO tile duas vezes: (2,1) para os dois lados)
+        # Bloco (tile único, 32x32)
+        self.afhb_block_tile = self.amazing_hammer_sheet.extract_tile(2, 0, scale=2)
+        self.afhb_platform_surface = pygame.Surface((64, 32), pygame.SRCALPHA)
+        self.afhb_platform_surface.blit(self.afhb_block_tile, (0, 0))
+        self.afhb_platform_surface.blit(self.afhb_block_tile, (32, 0))
+
+        # Asas (frames de animação)
+        self.afhb_wing_frame_1 = self.amazing_hammer_sheet.extract_tile(2, 1, scale=2)
+        self.afhb_wing_frame_2 = self.amazing_hammer_sheet.extract_tile(2, 2, scale=2)
+        self.afhb_wing_frames = [self.afhb_wing_frame_1, self.afhb_wing_frame_2]
+
+        # Martelo (8 frames)
+        self.hammer_frames = [
+            self.amazing_hammer_sheet.extract_tile(r, c, scale=2)
+            for r, c in [(3, 0), (3, 1), (3, 2), (3, 3), (4, 0), (4, 1), (4, 2), (4, 3)]
+        ]
+
     def load_tile_images(self):
         """Escaneia a pasta tiles_export e carrega todas as imagens na memória."""
         if not os.path.exists(TILES_EXPORT_DIR):
@@ -362,13 +413,18 @@ class AssetManager:
             "pop_out": self.koopa_red_pop_out_frames,
             "squashed": self.koopa_red_squashed_frame,
         }
-        return {
-            "walk": self.koopa_red_walk_frames,
-            "shell_idle": self.koopa_red_shell_idle_frame,
-            "shell_slide": self.koopa_red_shell_slide_frames,
-            "unshelled": self.koopa_red_unshelled_frames,
-            "pop_out": self.koopa_red_pop_out_frames,
-            "squashed": self.koopa_red_squashed_frame,
-            "fly": self.koopa_red_fly_frames,
-            "fly_turn": self.koopa_red_fly_turn_frame,
-        }
+
+    def get_afhb_frames(self):
+        return {"left": self.afhb_left_frames, "right": self.afhb_right_frames}
+
+    def get_hammer_frames(self):
+        return self.hammer_frames
+
+    def get_afhb_block(self):
+        return self.afhb_block_tile
+
+    def get_afhb_platform_surface(self):
+        return self.afhb_platform_surface
+
+    def get_afhb_wing_frames(self):
+        return self.afhb_wing_frames

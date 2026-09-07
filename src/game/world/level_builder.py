@@ -15,6 +15,7 @@ from src.game.world.rotating_block import RotatingBlock
 from src.game.entities.enemies.rex import Rex
 from src.game.entities.enemies.koopa import Koopa
 from src.game.entities.enemies.paratroopa import Paratroopa
+from src.game.entities.enemies.amazing_flying_hammer_bro import AmazingFlyingHammerBro
 
 
 class LevelBuilder:
@@ -227,6 +228,33 @@ class LevelBuilder:
                                           turns_at_edges=True,
                                           speed=1.0)
                         enemies.add(para)
+
+                    elif spawn_type == "AmazingFlyingHammerBro":
+                        from src.game.world.hammer_bro_platform import HammerBroPlatform
+                        # Cria a plataforma com movimento em arco
+                        flying_block = HammerBroPlatform(
+                            (x, y + 32),
+                            self.assets.get_afhb_platform_surface(),
+                            speed=1.5,
+                            range=250,
+                            vertical_amplitude=40  # <--- Ajuste a altura do arco aqui
+                        )
+                        platforms.add(flying_block)
+                        # Define as asas da plataforma
+                        flying_block.set_wing_frames(self.assets.get_afhb_wing_frames())
+                        # Cria o AFHB (apenas o corpo)
+                        afhb = AmazingFlyingHammerBro(
+                            (x, y),
+                            self.assets.get_afhb_frames(),
+                            self.assets.get_hammer_frames(),
+                            self.game,
+                            wing_frames=self.assets.get_afhb_wing_frames(),
+                        )
+                        afhb.level = self.level
+                        # Vincula o AFHB à plataforma
+                        flying_block.afhb = afhb
+                        # Adiciona aos grupos
+                        enemies.add(afhb)
 
         return {
             "tiles": tiles,

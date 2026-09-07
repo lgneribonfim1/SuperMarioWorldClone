@@ -800,7 +800,6 @@
                 "82,23": true
             },
             "KoopaRed": {
-                "10,24": true,
                 "97,24": true,
                 "103,24": true,
                 "108,24": true,
@@ -811,7 +810,11 @@
                 "131,24": true
             },
             "ParatroopaRed": {
-                "15,20": true
+                "36,21": true,
+                "45,21": true
+            },
+            "AmazingFlyingHammerBro": {
+                "11,21": true
             }
         }
     }

@@ -120,7 +120,7 @@ class TileEditor:
                                                      "YellowBox", "Goomba", "GoalBar", "JumpingPiranha",
                                                      "VolcanoLotus", "Muncher", "YoshiCoin", "PlatformH",
                                                      "PlatformV", "RotatingBlock", "Rex", "KoopaRed",
-                                                     "ParatroopaRed"],
+                                                     "ParatroopaRed", "AmazingFlyingHammerBro"],
                                             width=12, state="readonly")
         spawn_combo.grid(row=5, column=1, pady=(1, 0))
 
@@ -388,7 +388,7 @@ class TileEditor:
                 "GoalBar": "F", "JumpingPiranha": "J", "VolcanoLotus": "V",
                 "Muncher": "M", "YoshiCoin": "YC", "PlatformH": "PH",
                 "PlatformV": "PV", "RotatingBlock": "RB", "Rex": "RX",
-                "KoopaRed": "KR", "ParatroopaRed": "PR"
+                "KoopaRed": "KR", "ParatroopaRed": "PR", "AmazingFlyingHammerBro": "AH"
             }
             symbol = spawn_symbols.get(spawn_type, spawn_type[0])
             self.canvas.create_text(x + self.TILE_SIZE // 2, y + self.TILE_SIZE // 2,

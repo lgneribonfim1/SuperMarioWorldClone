@@ -61,7 +61,7 @@ class HorizontalPlatform(MovingPlatform):
 
     def update(self, collision_tiles=None):
         prev_x = self.rect.x
-        self.rect.x += self.direction.x * self.speed
+        self.rect.x += round(self.direction.x * self.speed)
 
         colidiu = False
         if collision_tiles:

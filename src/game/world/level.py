@@ -35,6 +35,7 @@ class Level:
         self.front_decoration_tiles = pygame.sprite.Group()
         self.debris = pygame.sprite.Group()
         self.reserve_items = pygame.sprite.Group()
+        self.enemy_projectiles = pygame.sprite.Group()
 
         # Portal (Meta do nível)
         self.goal_sprite = None
@@ -122,11 +123,11 @@ class Level:
         for obj in self.collectables:
             obj.draw(self.display_surface, self.camera)
 
-        for enemy in self.enemies:
-            enemy.draw(self.display_surface, self.camera)
-
         for platform in self.platforms:
             platform.draw(self.display_surface, self.camera)
+
+        for enemy in self.enemies:
+            enemy.draw(self.display_surface, self.camera)
 
         for tile in self.tiles:
             tile.draw(self.display_surface, self.camera)
@@ -134,9 +135,11 @@ class Level:
         for block in self.blocks:
             block.draw(self.display_surface, self.camera)
 
-        # FIREBALLS AGORA SÃO DESENHADAS DEPOIS DO TERRENO
         for fireball in self.fireballs:
             fireball.draw(self.display_surface, self.camera)
+
+        for enemy_proj in self.enemy_projectiles:
+            enemy_proj.draw(self.display_surface, self.camera)
 
         for mushroom in self.mushrooms:
             mushroom.draw(self.display_surface, self.camera)
@@ -265,6 +268,9 @@ class Level:
 
         for enemy in self.enemies:
             enemy.update(player, prev_rect, prev_hitbox)
+
+        for enemy_proj in self.enemy_projectiles:
+            enemy_proj.update()
 
         for mushroom in self.mushrooms:
             mushroom.update(self.collision_tiles, self.blocks, player, self)
