@@ -100,3 +100,17 @@ class PhysicsSystem:
             if moving_uphill:
                 player.direction.x *= SLOPE_LANDING_DAMPING
                 player.velocity_x = player.direction.x
+
+        if player.direction.y < 0 and platforms:
+            for platform in platforms:
+                # Verifica se a plataforma bloqueia por baixo (ex: HammerBroPlatform)
+                if hasattr(platform, 'blocks_vertical_from_below') and platform.blocks_vertical_from_below():
+                    if platform.rect.colliderect(player.rect):
+                        # Reposiciona o jogador para baixo do bloco
+                        player.rect.top = platform.rect.bottom
+                        player.direction.y = 0
+
+                        # Chama o método bump se existir
+                        if hasattr(platform, 'bump'):
+                            platform.bump(player.level)
+                        break

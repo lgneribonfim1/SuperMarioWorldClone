@@ -21,6 +21,8 @@ class AmazingFlyingHammerBro(Enemy):
         self.direction.x = -1  # Inicial (mas será sobrescrito)
         self.facing_right = False
 
+        self.velocity_y = 0
+
         self.state = "flying"
         self.animation_speed = 0.1
         self.wing_frame_index = 0
@@ -82,6 +84,16 @@ class AmazingFlyingHammerBro(Enemy):
             return
 
         level = player.level if hasattr(player, 'level') else None
+
+        if self.state == "dead":
+            self.velocity_y += 0.8  # GRAVITY
+            self.rect.y += self.velocity_y
+            self.hitbox.midtop = (self.rect.centerx, self.rect.top)
+
+            # Remove quando sair da tela (caiu no vazio)
+            if self.rect.top > 600:
+                self.kill()
+            return
 
         # Mantém o corpo sempre olhando para o jogador
         self._update_facing_to_player(player)
