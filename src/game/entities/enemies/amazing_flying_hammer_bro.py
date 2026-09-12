@@ -5,7 +5,7 @@ from src.game.entities.enemies.hammer import Hammer
 
 class AmazingFlyingHammerBro(Enemy):
     def __init__(self, pos, frame_sets, hammer_frames, game,
-                 wing_frames=None, throw_cooldown=90):
+                 wing_frames=None, throw_cooldown=50):
         super().__init__(pos, frame_sets["left"])
         self.game = game
 

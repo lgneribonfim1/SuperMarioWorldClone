@@ -20,6 +20,7 @@ class AudioManager:
         self.load_sound("1up", "1up")
         self.load_sound("dragon_coin", "dragon_coin")
         self.load_sound("reserve_drop", "reserve_drop")
+        self.load_sound("stomp_koopa_kid", "stomp_koopa_kid")
 
     def load_sound(self, name, filename):
         path = f"assets/sounds/effects/{filename}.wav"

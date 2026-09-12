@@ -1604,7 +1604,7 @@
             "11,17": {
                 "uid": "6df27efd",
                 "type": "Level",
-                "level_file": "map_1.json",
+                "level_file": "map_2.json",
                 "order": 0,
                 "music": "overworld"
             },

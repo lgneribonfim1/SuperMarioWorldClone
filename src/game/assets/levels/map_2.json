@@ -1281,6 +1281,7 @@
             "147,14": "terrain_1_8_8",
             "158,14": "terrain_1_7_7"
         },
+        "decorations": {},
         "is_wall": {
             "0,22": true,
             "1,22": true,
@@ -1718,15 +1719,6 @@
             "JumpingPiranha": {
                 "32,19": true
             },
-            "VolcanoLotus": {
-                "24,21": true
-            },
-            "Muncher": {
-                "10,21": true,
-                "11,21": true,
-                "12,21": true,
-                "13,21": true
-            },
             "YoshiCoin": {
                 "28,14": true,
                 "57,16": true,
@@ -1737,6 +1729,13 @@
             "PlatformH": {
                 "45,21": true,
                 "57,21": true
+            },
+            "AmazingFlyingHammerBro": {
+                "64,11": true
+            },
+            "LookoutChuck": {
+                "26,19": true,
+                "37,19": true
             }
         }
     }

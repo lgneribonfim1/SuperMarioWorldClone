@@ -772,26 +772,7 @@
                 "77,23": true,
                 "78,23": true,
                 "79,23": true,
-                "68,23": true,
-                "65,19": true,
-                "66,19": true,
-                "67,19": true,
-                "68,19": true,
-                "68,20": true,
-                "68,21": true,
-                "68,22": true,
-                "71,22": true,
-                "71,21": true,
-                "71,20": true,
-                "71,19": true,
-                "74,19": true,
-                "74,20": true,
-                "74,21": true,
-                "74,22": true,
-                "78,22": true,
-                "78,21": true,
-                "78,20": true,
-                "78,19": true
+                "68,23": true
             },
             "Muncher": {
                 "54,26": true
@@ -809,12 +790,8 @@
                 "126,24": true,
                 "131,24": true
             },
-            "ParatroopaRed": {
-                "36,21": true,
-                "45,21": true
-            },
             "AmazingFlyingHammerBro": {
-                "11,21": true
+                "89,23": true
             }
         }
     }

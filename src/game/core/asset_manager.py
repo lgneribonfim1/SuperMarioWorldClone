@@ -47,6 +47,10 @@ class AssetManager:
             os.path.join(ASSETS_DIR, "graphics", "enemies", "amazing_flying_hammer_bro.png"),
             16, 16
         )
+        self.player_effects_sheet = SpriteSheet(
+            os.path.join(ASSETS_DIR, "graphics", "sprites", "player_effects.png"),
+            16, 16
+        )
 
         self.horizontal_platform_surface = self._build_horizontal_platform()
         self.vertical_platform_surface = self.horizontal_platform_surface
@@ -296,6 +300,69 @@ class AssetManager:
             for r, c in [(3, 0), (3, 1), (3, 2), (3, 3), (4, 0), (4, 1), (4, 2), (4, 3)]
         ]
 
+        # -----------------------------
+        # CHARGIN' CHUCK (base para todas as variantes)
+        # -----------------------------
+        self.chuck_sheet = SpriteSheet(
+            os.path.join(ASSETS_DIR, "graphics", "enemies", "chargin_chuck.png"),
+            16, 16
+        )
+
+        def extract_chuck(row, col):
+            """Extrai um frame 32x32 (2x2 tiles) em escala 2 = 64x64."""
+            return self.chuck_sheet.extract_sprite(
+                row=row, col=col,
+                sprite_width=32, sprite_height=32,
+                scale=2
+            )
+
+        # LOOKOUT CHUCK (Chargin')
+        # Correndo: frame 1 = (0,0); frame 2 = (0,1)
+        # Saltando: (0,3)
+        # Olhando para os lados: (1, 0..6) -> 7 frames
+        # Sendo pisado: (2, 0..8) -> 9 frames
+        self.lookout_run_frames = [
+            extract_chuck(0, 0),
+            extract_chuck(0, 1),
+        ]
+        self.lookout_jump_frame = extract_chuck(0, 3)
+        self.lookout_look_frames = [extract_chuck(1, c) for c in range(7)]
+        self.lookout_hurt_frames = [extract_chuck(2, c) for c in range(9)]
+        # ==========================================================
+        # LOOKOUT CHUCK — ANIMAÇÃO DE "OLHAR PARA TRÁS" (estado look)
+        # ==========================================================
+        # Conversão 16px -> 32px: row_16/2 = row_32 ; col_16/2 = col_32
+        #
+        # Passando e começando a olhar para trás (3 frames):
+        #   rows 8-9  -> row 4 ; cols 14-15, 16-17, 18-19 -> col 7, 8, 9
+        self.lookout_pass_frames = [
+            extract_chuck(4, 7),
+            extract_chuck(5, 7), #(4, 8),
+            extract_chuck(4, 8), #(4, 9),
+        ]
+
+        # Continuando a olhar para trás (3 frames):
+        #   rows 10-11 -> row 5 ; cols 14-15, 16-17, 18-19 -> col 7, 8, 9
+        self.lookout_look_back_frames = [
+            extract_chuck(5, 8), #(5, 7),
+            extract_chuck(4, 9), #(5, 8),
+            extract_chuck(5, 9),
+        ]
+
+        # Procurando o player em loop (3 frames):
+        #   rows 12-13 -> row 6 ; cols 14-15, 16-17, 18-19 -> col 7, 8, 9
+        self.lookout_search_frames = [
+            extract_chuck(6, 7),
+            extract_chuck(6, 8),
+            extract_chuck(6, 9),
+        ]
+
+        self.dust_frames = [
+        self.player_effects_sheet.extract_tile(row=0, col=2, scale=2),
+        self.player_effects_sheet.extract_tile(row=0, col=1, scale=2),
+        self.player_effects_sheet.extract_tile(row=0, col=0, scale=2),
+        ]
+
     def load_tile_images(self):
         """Escaneia a pasta tiles_export e carrega todas as imagens na memória."""
         if not os.path.exists(TILES_EXPORT_DIR):
@@ -428,3 +495,17 @@ class AssetManager:
 
     def get_afhb_wing_frames(self):
         return self.afhb_wing_frames
+
+    def get_lookout_chuck_frames(self):
+        return {
+            "run": self.lookout_run_frames,
+            "jump": self.lookout_jump_frame,
+            "look": self.lookout_look_frames,
+            "hurt": self.lookout_hurt_frames,
+            "pass": self.lookout_pass_frames,
+            "look_back": self.lookout_look_back_frames,
+            "search": self.lookout_search_frames,
+        }
+
+    def get_dust_frames(self):
+        return self.dust_frames

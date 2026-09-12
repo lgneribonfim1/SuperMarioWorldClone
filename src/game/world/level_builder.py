@@ -16,6 +16,7 @@ from src.game.entities.enemies.rex import Rex
 from src.game.entities.enemies.koopa import Koopa
 from src.game.entities.enemies.paratroopa import Paratroopa
 from src.game.entities.enemies.amazing_flying_hammer_bro import AmazingFlyingHammerBro
+from src.game.entities.enemies.lookout_chuck import LookoutChuck
 
 
 class LevelBuilder:
@@ -255,6 +256,15 @@ class LevelBuilder:
                         flying_block.afhb = afhb
                         # Adiciona aos grupos
                         enemies.add(afhb)
+
+                    elif spawn_type == "LookoutChuck":
+                        chuck = LookoutChuck(
+                            (x, y),
+                            self.assets.get_lookout_chuck_frames(),
+                            self.game
+                        )
+                        chuck.level = self.level
+                        enemies.add(chuck)
 
         return {
             "tiles": tiles,

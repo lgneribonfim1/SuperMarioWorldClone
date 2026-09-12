@@ -127,13 +127,19 @@ class Level:
             platform.draw(self.display_surface, self.camera)
 
         for enemy in self.enemies:
-            enemy.draw(self.display_surface, self.camera)
+            # Só desenha inimigos que NÃO estão em estado de morte
+            if getattr(enemy, 'state', None) != 'dead':
+                enemy.draw(self.display_surface, self.camera)
 
         for tile in self.tiles:
             tile.draw(self.display_surface, self.camera)
 
         for block in self.blocks:
             block.draw(self.display_surface, self.camera)
+
+        for enemy in self.enemies:
+            if getattr(enemy, 'state', None) == 'dead':
+                enemy.draw(self.display_surface, self.camera)
 
         for fireball in self.fireballs:
             fireball.draw(self.display_surface, self.camera)
@@ -270,7 +276,7 @@ class Level:
             enemy.update(player, prev_rect, prev_hitbox)
 
         for enemy_proj in self.enemy_projectiles:
-            enemy_proj.update()
+            enemy_proj.update(player, prev_rect, prev_hitbox)
 
         for mushroom in self.mushrooms:
             mushroom.update(self.collision_tiles, self.blocks, player, self)
