@@ -102,7 +102,6 @@ class Level:
 
         self.hud = HUD(self.character, self.player.sprite)
 
-
     def collect_coins(self):
         player = self.player.sprite
         for coin in self.collectables:
@@ -111,6 +110,7 @@ class Level:
 
     def draw(self):
         self.background.draw(self.display_surface, self.camera)
+        DEATH_STATES = ('dead', 'dead_thrown')
 
         # ORDEM DE RENDERIZAÇÃO (Z-Order)
         for decoration in self.back_decoration_tiles:
@@ -138,7 +138,7 @@ class Level:
             block.draw(self.display_surface, self.camera)
 
         for enemy in self.enemies:
-            if getattr(enemy, 'state', None) == 'dead':
+            if getattr(enemy, 'state', None) in DEATH_STATES:
                 enemy.draw(self.display_surface, self.camera)
 
         for fireball in self.fireballs:

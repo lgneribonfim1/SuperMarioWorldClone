@@ -58,6 +58,8 @@ class Koopa(Enemy):
         self.pop_out_elapsed = 0
 
         self.hitbox = self.rect.inflate(-6, -4)
+        self.flipped_vertically = False
+        self.kick_grace_timer = 0
 
     def spawn_unshelled(self, level):
         unshelled = UnshelledKoopa(
@@ -71,13 +73,24 @@ class Koopa(Enemy):
             turns_at_edges=self.turns_at_edges,
             dash_speed=10.0,
             dash_distance=40,
-            original_direction=self.pre_shell_direction  # <-- Passa a direção original
+            original_direction=self.pre_shell_direction
         )
         level.enemies.add(unshelled)
         self.linked_koopa = unshelled
         self.state = "empty"
         self.has_creature = False
         self.image = self.shell_idle_frame
+
+        # ==========================================================
+        # EFEITO DE POEIRA NO MOMENTO DA EXPULSÃO
+        # ==========================================================
+        from src.game.world.effects.dust_effect import DustEffect
+        level.effects.add(DustEffect(
+            (self.rect.centerx, self.rect.bottom),
+            level.assets.get_dust_frames(),
+            offset=(0, -4),
+            animation_speed=0.3
+        ))
 
     def reclaim_shell(self):
         if self.state == "empty":
@@ -113,6 +126,26 @@ class Koopa(Enemy):
                         self.rect.bottom = tile.rect.top
                         self.velocity_y = 0
                         self.on_ground = True
+
+    def kick_by_shell(self):
+        """Chamado quando um casco deslizante atinge este Koopa.
+        Ele é arremessado ~3 tiles para cima, vira de ponta cabeça
+        e cai no vazio (atravessando os tiles)."""
+        if self.state == "dead_thrown":
+            return
+
+        # Sempre usa o casco parado como visual
+        self.image = self.shell_idle_frame
+
+        # Ajusta o rect para o tamanho do casco (32x32), preservando o centro
+        old_center = self.rect.center
+        self.rect = self.image.get_rect(center=old_center)
+        self.hitbox = self.rect.inflate(-6, -4)
+
+        self.state = "dead_thrown"
+        self.velocity_y = -13   # ~3 tiles de altura
+        self.flipped_vertically = True
+        self.game.audio.play_sound("kick1")
 
     def _check_wall_and_turn(self, level, speed):
         self.rect.x += self.direction.x * speed
@@ -177,6 +210,7 @@ class Koopa(Enemy):
     # COLISÃO COM O PLAYER (Método único e centralizado)
     # ------------------------------------------------------------
     def _handle_player_collision(self, player, prev_player_rect):
+        print(f"[KOOPA] _handle_player_collision - state={self.state}")
         # ==========================================
         # 2. Calcula is_stomp (com margem de +16)
         # ==========================================
@@ -230,6 +264,9 @@ class Koopa(Enemy):
                 pass
 
         elif self.state == "shell_sliding":
+            # Período de graça: recém-chutado não machuca o player
+            if self.kick_grace_timer > 0:
+                return
             if player.spinning:
                 self.state = "dead"
                 self.dead_timer = 60
@@ -255,6 +292,7 @@ class Koopa(Enemy):
             if is_stomp:
                 self.direction.x = 1 if player.rect.centerx < self.rect.centerx else -1
                 self.state = "shell_sliding"
+                self.kick_grace_timer = 15  # <-- 0,25s de graça
                 self.game.audio.play_sound("bump")
                 player.direction.y = -8
             else:
@@ -262,7 +300,11 @@ class Koopa(Enemy):
                 if player.direction.x != 0:
                     self.direction.x = 1 if player.direction.x > 0 else -1
                     self.state = "shell_sliding"
+                    self.kick_grace_timer = 15  # <-- 0,25s de graça
                     self.game.audio.play_sound("bump")
+                    # Afasta o casco do player para evitar sobreposição
+                    self.rect.x += self.direction.x * 4
+                    self.hitbox.center = self.rect.center
                 else:
                     pass
 
@@ -297,6 +339,25 @@ class Koopa(Enemy):
 
         level = player.level if hasattr(player, 'level') else None
 
+        # ==========================================================
+        # ESTADO "DEAD_THROWN" — cai no vazio, virado de ponta cabeça
+        # Verificado ANTES de qualquer outra coisa (incluindo animate)
+        # ==========================================================
+        if self.state == "dead_thrown":
+            self.velocity_y += self.gravity
+            self.rect.y += round(self.velocity_y)
+            self.hitbox.center = self.rect.center
+
+            if level:
+                death_threshold = level.world_origin.y + level.level_h + 200
+            else:
+                death_threshold = 2000
+
+            if self.rect.top > death_threshold:
+                self.kill()
+            return
+
+        # --- Estado "dead" (Koopa pisado de forma normal) ---
         if self.state == "dead":
             self.dead_timer -= 1
             if self.dead_timer <= 0:
@@ -304,6 +365,9 @@ class Koopa(Enemy):
             return
 
         self.animate()
+
+        if self.kick_grace_timer > 0:
+            self.kick_grace_timer -= 1
 
         # Movimento por estado
         if self.state == "walking":
@@ -328,13 +392,19 @@ class Koopa(Enemy):
             # A única interação é com o player (tratada no método de colisão).
             # A recuperação do casco pela criatura é feita pelo UnshelledKoopa.
 
+
         elif self.state == "shell_sliding":
             self._check_wall_and_turn(level, self.slide_speed)
+            # Atualiza a hitbox IMEDIATAMENTE após mover, antes de colidir
+            self.hitbox.center = self.rect.center
             if level:
                 for enemy in level.enemies:
                     if enemy is not self and getattr(enemy, 'alive', False) \
                             and self.hitbox.colliderect(enemy.hitbox):
-                        enemy.kill()
+                        if hasattr(enemy, 'kick_by_shell'):
+                            enemy.kick_by_shell()
+                        else:
+                            enemy.kill()
 
         elif self.state == "unshelled":
             self._check_wall_and_turn(level, self.base_speed * 1.5)
@@ -362,5 +432,10 @@ class Koopa(Enemy):
 
     def draw(self, surface, camera):
         if self.alive:
-            image_rect = self.image.get_rect(midbottom=self.rect.midbottom)
-            surface.blit(self.image, camera.apply(image_rect))
+            image = self.image
+            if self.flipped_vertically:
+                image = pygame.transform.flip(image, False, True)
+                image_rect = image.get_rect(center=self.rect.center)
+            else:
+                image_rect = image.get_rect(midbottom=self.rect.midbottom)
+            surface.blit(image, camera.apply(image_rect))

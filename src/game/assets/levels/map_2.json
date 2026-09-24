@@ -1705,13 +1705,13 @@
             },
             "YellowBox": {
                 "71,13": true,
-                "17,17": true,
-                "152,14": true
+                "152,14": true,
+                "17,18": true
             },
             "MysteryBox1": {
-                "18,17": true,
-                "16,17": true,
-                "151,14": true
+                "151,14": true,
+                "16,18": true,
+                "18,18": true
             },
             "GoalBar": {
                 "194,17": true
@@ -1734,8 +1734,13 @@
                 "64,11": true
             },
             "LookoutChuck": {
-                "26,19": true,
                 "37,19": true
+            },
+            "KoopaRed": {
+                "23,19": true
+            },
+            "ParatroopaRed": {
+                "23,14": true
             }
         }
     }

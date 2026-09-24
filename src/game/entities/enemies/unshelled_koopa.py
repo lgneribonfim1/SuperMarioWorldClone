@@ -45,10 +45,25 @@ class UnshelledKoopa(Enemy):
         self.dash_friction = 0.4
         self.dash_until_speed = self.speed
 
+        self.dust_timer = 0
+        self.dust_interval = 6  # Spawna poeira a cada 6 frames
+
         self.state = "walking"
         self.squash_timer = 0
 
         self.hitbox = self.rect.inflate(-8, -6)
+        self.flipped_vertically = False
+
+    def kick_by_shell(self):
+        """Chamado quando um casco deslizante atinge o Koopa sem casco.
+        Ele é arremessado para cima, vira de ponta cabeça e cai no vazio."""
+        if self.state == "dead_thrown":
+            return
+
+        self.state = "dead_thrown"
+        self.velocity_y = -13  # ~3 tiles de altura
+        self.flipped_vertically = True
+        self.game.audio.play_sound("kick1")
 
     def apply_gravity(self, level):
         self.velocity_y += self.gravity
@@ -104,6 +119,15 @@ class UnshelledKoopa(Enemy):
         if self.pop_out_elapsed >= self.pop_out_total_duration:
             self.pop_out_phase = False
             self.frames = self.unshelled_frames
+            # ==========================================================
+            # VIRA NA DIREÇÃO DO CASCO (após o pop_out)
+            # ==========================================================
+            if self.linked_shell is not None and self.linked_shell.alive:
+                if self.linked_shell.rect.centerx > self.rect.centerx:
+                    self.direction.x = 1
+                elif self.linked_shell.rect.centerx < self.rect.centerx:
+                    self.direction.x = -1
+                self.facing_right = self.direction.x > 0
 
     def _hurt_player(self, player):
         if player.invincible:
@@ -131,6 +155,21 @@ class UnshelledKoopa(Enemy):
 
         level = player.level if hasattr(player, 'level') else None
 
+        # --- Estado ARREMESSADO POR CASCO (cai no vazio, virado) ---
+        if self.state == "dead_thrown":
+            self.velocity_y += self.gravity
+            self.rect.y += round(self.velocity_y)
+            self.hitbox.center = self.rect.center
+
+            if level:
+                death_threshold = level.world_origin.y + level.level_h + 200
+            else:
+                death_threshold = 2000
+
+            if self.rect.top > death_threshold:
+                self.kill()
+            return
+
         # Estado esmagado
         if self.state == "squashed":
             self.squash_timer -= 1
@@ -141,6 +180,21 @@ class UnshelledKoopa(Enemy):
         # Atualização da fase
         if self.pop_out_phase:
             self._update_pop_out()
+            # ==========================================================
+            # POEIRA DURANTE O ARRASTO (só no chão)
+            # ==========================================================
+            if self.on_ground:
+                self.dust_timer += 1
+                if self.dust_timer >= self.dust_interval:
+                    self.dust_timer = 0
+                    if level:
+                        from src.game.world.effects.dust_effect import DustEffect
+                        level.effects.add(DustEffect(
+                            (self.rect.centerx, self.rect.bottom),
+                            level.assets.get_dust_frames(),
+                            offset=(0, -4),
+                            animation_speed=0.35
+                        ))
         else:
             self.animate()
 
@@ -179,11 +233,18 @@ class UnshelledKoopa(Enemy):
 
         # Recuperação do casco (também só após o pop_out)
         if not self.pop_out_phase:
-            if self.linked_shell is not None and self.hitbox.colliderect(self.linked_shell.hitbox):
+            if self.linked_shell is not None and \
+                    self.linked_shell.state == "empty" and \
+                    self.hitbox.colliderect(self.linked_shell.hitbox):
                 self.linked_shell.reclaim_shell()
                 self.kill()
 
     def draw(self, surface, camera):
         if self.alive:
-            image_rect = self.image.get_rect(midbottom=self.rect.midbottom)
-            surface.blit(self.image, camera.apply(image_rect))
+            image = self.image
+            if self.flipped_vertically:
+                image = pygame.transform.flip(image, False, True)
+                image_rect = image.get_rect(center=self.rect.center)
+            else:
+                image_rect = image.get_rect(midbottom=self.rect.midbottom)
+            surface.blit(image, camera.apply(image_rect))
